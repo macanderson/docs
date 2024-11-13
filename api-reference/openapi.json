@@ -1,2647 +1,3798 @@
-openapi: 3.1.0
-info:
-title: UnusualWhales API
-version: '1.0.0'
-description: >
-API for accessing options flow, stock data, congressional and institutional
-trading information, dark pool data, ETF holdings, stock screener
-functionality, seasonality data, detailed options data, analyst ratings,
-market data, option contract details, and comprehensive stock information
-from UnusualWhales.
-servers:
-
-* url: [https://api.unusualwhales.com](https://api.unusualwhales.com)
-  security:
-
-* ApiKeyAuth: \[]
-  components:
-  securitySchemes:
-  ApiKeyAuth:
-  type: apiKey
-  in: header
-  name: Authorization
-  schemas:
-  AnalystRating:
-  properties:
-  action:
-  description: The action taken (e.g., Initiated, Upgraded, Downgraded).
-  type: string
-  analyst:
-  type: string
-  date:
-  format: date
-  type: string
-  priceTarget:
-  description: The price target set by the analyst.
-  type: number
-  rating:
-  description: Analyst's rating (e.g., Buy, Hold, Sell).
-  type: string
-  type: object
-  AnalystRatingsResponse:
-  properties:
-  ratings:
-  items:
-  $ref: '#/components/schemas/AnalystRating'
-  type: array
-  symbol:
-  type: string
-  type: object
-  AnalystUpgradesDowngradesResponse:
-  properties:
-  upgradesDowngrades:
-  items:
-  $ref: '#/components/schemas/AnalystRating'
-  type: array
-  type: object
-  Article:
-  properties:
-  publishedAt:
-  format: date-time
-  type: string
-  source:
-  type: string
-  title:
-  type: string
-  url:
-  format: uri
-  type: string
-  type: object
-  CompanyProfileResponse:
-  properties:
-  address:
-  type: string
-  ceo:
-  type: string
-  companyName:
-  type: string
-  description:
-  type: string
-  employees:
-  type: integer
-  industry:
-  type: string
-  sector:
-  type: string
-  symbol:
-  type: string
-  website:
-  format: uri
-  type: string
-  type: object
-  CongressMembersResponse:
-  properties:
-  members:
-  items:
-  type: string
-  type: array
-  type: object
-  CongressTrade:
-  properties:
-  amount:
-  type: string
-  disclosureDate:
-  format: date
-  type: string
-  member:
-  type: string
-  symbol:
-  type: string
-  transactionDate:
-  format: date
-  type: string
-  transactionType:
-  enum:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:parameters:
-
-  * description: Minimum market capitalization.
-    in: query
-    name: marketCapMin
-    required: false
-    schema:
-    type: number
-
-  * description: Maximum market capitalization.
-    in: query
-    name: marketCapMax
-    required: false
-    schema:
-    type: number
-
-  * description: Minimum stock price.
-    in: query
-    name: priceMin
-    required: false
-    schema:
-    type: number
-
-  * description: Maximum stock price.
-    in: query
-    name: priceMax
-    required: false
-    schema:
-    type: number
-
-  * description: Minimum trading volume.
-    in: query
-    name: volumeMin
-    required: false
-    schema:
-    type: number
-
-  * description: Maximum trading volume.
-    in: query
-    name: volumeMax
-    required: false
-    schema:
-    type: number
-
-  * description: Sector to filter stocks.
-    in: query
-    name: sector
-    required: false
-    schema:
-    type: string
-
-  * description: Industry to filter stocks.
-    in: query
-    name: industry
-    required: false
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/StockScreenerResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get stocks matching screening criteria
-    post:
-    description: Retrieve stocks that meet specified screening criteria sent in the
-    request body.
-    operationId: postStockScreenerResults
-    requestBody:
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/StockScreenerRequest'
-    required: true
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/StockScreenerResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get stocks matching complex screening criteria
-
-  - description: Stock symbol to retrieve quote data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/StockQuoteResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get real-time stock quote
-    /stocks/screener:
-    get:
-    description: Retrieve stocks that meet specified screening criteria.
-    operationId: getStockScreenerResults
-
-  * description: Stock symbol to get the price for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/StockPriceResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get current stock price
-    /stocks/quote/{symbol}:
-    get:
-    description: Retrieve real-time quote data for a specific stock symbol.
-    operationId: getStockQuote
-
-  - description: Stock symbol to retrieve historical data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  - description: Start date for the historical data.
-    in: query
-    name: startDate
-    required: true
-    schema:
-    format: date
-    type: string
-
-  - description: End date for the historical data.
-    in: query
-    name: endDate
-    required: true
-    schema:
-    format: date
-    type: string
-
-  - description: Data interval (e.g., '1d', '1wk', '1mo').
-    in: query
-    name: interval
-    required: false
-    schema:
-    enum:
-
-    * 1m
-
-    * 5m
-
-    * 15m
-
-    * 30m
-
-    * 1h
-
-    * 1d
-
-    * 1wk
-
-    * 1mo
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/HistoricalStockDataResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get historical stock data
-      /stocks/price/{symbol}:
-      get:
-      description: Retrieve the current price for a stock symbol.
-      operationId: getStockPrice
-
-  * description: Stock symbol to retrieve financial statements for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Type of financial statement ('income', 'balance', 'cashflow').
-    in: query
-    name: statementType
-    required: true
-    schema:
-    enum:
-
-    * income
-
-    * balance
-
-    * cashflow
-      type: string
-
-  * description: Period type ('annual', 'quarterly').
-    in: query
-    name: period
-    required: false
-    schema:
-    enum:
-
-    * annual
-
-    * quarterly
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/FinancialStatementsResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get financial statements
-      /stocks/historical/{symbol}:
-      get:
-      description: Retrieve historical price data for a specific stock symbol.
-      operationId: getHistoricalStockData
-
-  - description: Stock symbol to retrieve earnings data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/EarningsDataResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get earnings data
-    /stocks/financials/{symbol}:
-    get:
-    description: Retrieve financial statements for a specific stock symbol.
-    operationId: getFinancialStatements
-
-  * description: Stock symbol to retrieve dividend data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Start date for the dividend data.
-    in: query
-    name: startDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: End date for the dividend data.
-    in: query
-    name: endDate
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/DividendDataResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get dividend data
-    /stocks/earnings/{symbol}:
-    get:
-    description: Retrieve earnings history and estimates for a specific stock symbol.
-    operationId: getEarningsData
-
-  - description: Stock symbol to retrieve company information for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/CompanyProfileResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get company profile
-    /stocks/dividends/{symbol}:
-    get:
-    description: Retrieve dividend history for a specific stock symbol.
-    operationId: getDividendData
-
-  * description: Stock symbol to filter spike data.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  * description: Date to filter spike data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Threshold for spike detection.
-    in: query
-    name: threshold
-    required: false
-    schema:
-    type: number
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/SpikeDetectionResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get spike detection data
-    /stocks/company/{symbol}:
-    get:
-    description: Retrieve detailed company information for a specific stock symbol.
-    operationId: getCompanyProfile
-
-  - description: Stock symbol to retrieve seasonality data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  - description: Time frame for seasonality data (e.g., 'monthly', 'weekly').
-    in: query
-    name: timeFrame
-    required: false
-    schema:
-    enum:
-
-    * daily
-
-    * weekly
-
-    * monthly
-
-    * yearly
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/StockSeasonalityResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get seasonality data for a stock
-      /spike/detection:
-      get:
-      description: Retrieve data on detected spikes in trading activity.
-      operationId: getSpikeDetection
-
-  * description: Stock symbol to filter total options volume.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  * description: Date to filter total options volume.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/TotalOptionsVolumeResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get total options volume data
-    /seasonality/stocks/{symbol}:
-    get:
-    description: Retrieve seasonality data for a specific stock symbol.
-    operationId: getStockSeasonality
-
-  - description: Stock symbol to retrieve OI change data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  - description: Date to filter the OI change data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OIChangeResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get open interest change data for a symbol
-    /options/total\_volume:
-    get:
-    description: Retrieve total options volume for all symbols or a specific symbol.
-    operationId: getTotalOptionsVolume
-
-  * description: Stock symbol to retrieve historical options data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Start date for the historical data.
-    in: query
-    name: startDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: End date for the historical data.
-    in: query
-    name: endDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Option expiration date to filter the data.
-    in: query
-    name: expiration
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Option strike price to filter the data.
-    in: query
-    name: strike
-    required: false
-    schema:
-    type: number
-
-  * description: Option type (CALL or PUT).
-    in: query
-    name: optionType
-    required: false
-    schema:
-    enum:
-
-    * CALL
-
-    * PUT
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/HistoricalOptionsResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get historical options data for a symbol
-      /options/oi\_change/{symbol}:
-      get:
-      description: Retrieve open interest change data for a specific stock symbol.
-      operationId: getOIChange
-
-  - description: Stock symbol to retrieve option greeks data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  - description: Option expiration date to filter the greeks data.
-    in: query
-    name: expiration
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: Option strike price to filter the greeks data.
-    in: query
-    name: strike
-    required: false
-    schema:
-    type: number
-
-  - description: Option type (CALL or PUT).
-    in: query
-    name: optionType
-    required: false
-    schema:
-    enum:
-
-    * CALL
-
-    * PUT
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/OptionGreeksResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get option greeks data for a symbol
-      /options/historical/{symbol}:
-      get:
-      description: Retrieve historical options data for a specific stock symbol.
-      operationId: getHistoricalOptions
-
-  * description: Stock symbol to filter the Greek flow data.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  * description: Date to filter the Greek flow data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Option expiration date.
-    in: query
-    name: expiration
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionsGreekFlowByExpiryResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get options Greek flow data by expiry
-    /options/greeks/{symbol}:
-    get:
-    description: Retrieve option greeks data for a specific stock symbol.
-    operationId: getOptionGreeks
-
-  - description: Stock symbol to filter the Greek flow data.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  - description: Date to filter the Greek flow data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: Minimum delta value.
-    in: query
-    name: minDelta
-    required: false
-    schema:
-    type: number
-
-  - description: Maximum delta value.
-    in: query
-    name: maxDelta
-    required: false
-    schema:
-    type: number
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionsGreekFlowResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get options Greek flow data
-    /options/greekflow/expiry:
-    get:
-    description: Retrieve options Greek flow data aggregated by expiration date.
-    operationId: getOptionsGreekFlowByExpiry
-
-  * description: Stock symbol to retrieve options flow data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Date to filter the options flow data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionsFlowResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get options flow data for a symbol
-    /options/greekflow:
-    get:
-    description: Retrieve options flow data with Greek calculations.
-    operationId: getOptionsGreekFlow
-
-  - description: Stock symbol to filter the options flow data.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  - description: Date to filter the options flow data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionsFlowResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get options flow data
-    /options/flow/{symbol}:
-    get:
-    description: Retrieve options flow data for a specific symbol.
-    operationId: getOptionsFlowBySymbol
-
-  * description: Stock symbol to filter option contracts.
-    in: query
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Option expiration date to filter contracts.
-    in: query
-    name: expiration
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Option strike price to filter contracts.
-    in: query
-    name: strike
-    required: false
-    schema:
-    type: number
-
-  * description: Option type (CALL or PUT) to filter contracts.
-    in: query
-    name: optionType
-    required: false
-    schema:
-    enum:
-
-    * CALL
-
-    * PUT
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/OptionContractsResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get option contracts based on filters
-      /options/expirations/{symbol}:
-      get:
-      description: Retrieve available option expiration dates for a specific stock symbol.
-      operationId: getOptionExpirations
-      parameters:
-
-  * description: Stock symbol to retrieve option expiration dates for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionExpirationsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get option expiration dates for a symbol
-    /options/flow:
-    get:
-    description: Retrieve options flow data.
-    operationId: getOptionsFlow
-
-  - description: Option symbol to retrieve data for.
-    in: path
-    name: optionSymbol
-    required: true
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionContractDetailsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get detailed information about a specific option contract
-    /options/contracts:
-    get:
-    description: Retrieve a list of option contracts based on specified filters.
-    operationId: getOptionContracts
-
-  * description: Stock symbol to retrieve option chain data for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Option expiration date to filter the option chain data.
-    in: query
-    name: expiration
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/OptionChainResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get option chain data for a symbol
-    /options/contract/{optionSymbol}:
-    get:
-    description: Retrieve detailed data for a specific option contract identified by
-    its option symbol.
-    operationId: getOptionContract
-
-  - description: Comma-separated list of stock symbols to filter news.
-    in: query
-    name: symbols
-    required: false
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/NewsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get latest news
-    /options/chain/{symbol}:
-    get:
-    description: Retrieve the option chain data for a specific stock symbol.
-    operationId: getOptionChain
-
-  * description: Time frame for sector performance (e.g., 'daily', 'weekly').
-    in: query
-    name: timeFrame
-    required: false
-    schema:
-    enum:
-
-    * daily
-
-    * weekly
-
-    * monthly
-
-    * yearly
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/MarketSectorsResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get sector performance data
-      /news:
-      get:
-      description: Retrieve the latest financial news.
-      operationId: getNews
-
-  - description: Date to filter news articles.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/MarketNewsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get market-wide news
-    /market/overview:
-    get:
-    description: Retrieve an overview of the current market status.
-    operationId: getMarketOverview
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/MarketOverviewResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get market overview
-    /market/sectors:
-    get:
-    description: Retrieve performance data for market sectors.
-    operationId: getMarketSectors
-
-  * description: Type of movers to retrieve ('gainers' or 'losers').
-    in: query
-    name: type
-    required: false
-    schema:
-    enum:
-
-    * gainers
-
-    * losers
-      type: string
-
-  * description: Number of records to retrieve.
-    in: query
-    name: limit
-    required: false
-    schema:
-    default: 10
-    type: integer
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/MarketMoversResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get top market movers
-    /market/news:
-    get:
-    description: Retrieve the latest news affecting the overall market.
-    operationId: getMarketNews
-
-  - description: Name of the institution to filter trades.
-    in: query
-    name: institution
-    required: false
-    schema:
-    type: string
-
-  - description: Stock symbol to filter trades.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  - description: Date to filter trades.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/InstitutionTradesResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get institutional trading data
-    /market/indices:
-    get:
-    description: Retrieve data on major market indices.
-    operationId: getMarketIndices
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/MarketIndicesResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get major market indices data
-    /market/movers:
-    get:
-    description: Retrieve top gainers and losers in the market.
-    operationId: getMarketMovers
-
-  * description: Stock symbol to filter institutional activity.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  * description: Date to filter institutional activity.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Name of the institution.
-    in: query
-    name: institution
-    required: false
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/InstitutionalActivityResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get institutional activity data
-    /institutions/list:
-    get:
-    description: Retrieve a list of institutions that have reported trades.
-    operationId: getInstitutionsList
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/InstitutionsListResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get list of institutions
-    /institutions/trades:
-    get:
-    description: Retrieve trading data reported by institutions.
-    operationId: getInstitutionTrades
-
-  - description: Stock symbol to filter insider trades.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  - description: Name of the insider.
-    in: query
-    name: insider
-    required: false
-    schema:
-    type: string
-
-  - description: Date to filter insider trades.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: Type of transaction (Buy or Sell).
-    in: query
-    name: transactionType
-    required: false
-    schema:
-    enum:
-
-    * Buy
-
-    * Sell
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/InsiderTradesResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get insider trading data
-      /institutional/activity:
-      get:
-      description: Retrieve data on institutional trading activity.
-      operationId: getInstitutionalActivity
-
-  * description: Date to filter ETF tide data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: ETF symbol to filter data.
-    in: query
-    name: etf
-    required: false
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/ETFTideResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get ETF tide data
-    /insider/trades:
-    get:
-    description: Retrieve data on insider buys and sells.
-    operationId: getInsiderTrades
-
-  - description: Sector to filter ETFs.
-    in: query
-    name: sector
-    required: false
-    schema:
-    type: string
-
-  - description: Date to filter sector ETF data.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/SectorETFsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get sector ETFs data
-    /etf/sectors/list:
-    get:
-    description: Retrieve a list of available sectors for ETFs.
-    operationId: getSectorList
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/SectorListResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get list of sectors
-    /etf/tide:
-    get:
-    description: Retrieve data showing ETF inflows and outflows.
-    operationId: getETFTide
-
-  * description: Stock symbol to filter dark pool transactions.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  * description: Date to filter dark pool transactions.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/DarkPoolTransactionsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get dark pool transactions
-    /darkpool/transactions/{symbol}:
-    get:
-    description: Retrieve dark pool transactions for a specific symbol.
-    operationId: getDarkPoolTransactionsBySymbol
-    parameters:
-
-  * description: Stock symbol to retrieve dark pool transactions for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  * description: Date to filter dark pool transactions.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/DarkPoolTransactionsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get dark pool transactions for a symbol
-    /etf/holdings:
-    get:
-    description: Retrieve holdings data for ETFs.
-    operationId: getETFHoldings
-    parameters:
-
-  * description: ETF symbol to retrieve holdings for.
-    in: query
-    name: etf
-    required: true
-    schema:
-    type: string
-
-  * description: Date to filter ETF holdings.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/ETFHoldingsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get ETF holdings data
-    /etf/list:
-    get:
-    description: Retrieve a list of ETFs available.
-    operationId: getETFList
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/ETFListResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get list of ETFs
-    /etf/sectors:
-    get:
-    description: Retrieve data for ETFs categorized by sectors.
-    operationId: getSectorETFs
-
-  - description: Start date for the FDA calendar data.
-    in: query
-    name: startDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: End date for the FDA calendar data.
-    in: query
-    name: endDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: Stock symbol to filter FDA events.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/FDACalendarResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get FDA calendar data
-    /congress/members:
-    get:
-    description: Retrieve a list of Congress members who have reported trades.
-    operationId: getCongressMembers
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/CongressMembersResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get list of Congress members
-    /congress/trades:
-    get:
-    description: Retrieve trading data reported by members of Congress.
-    operationId: getCongressTrades
-    parameters:
-
-  - description: Name of the Congress member to filter trades.
-    in: query
-    name: member
-    required: false
-    schema:
-    type: string
-
-  - description: Stock symbol to filter trades.
-    in: query
-    name: symbol
-    required: false
-    schema:
-    type: string
-
-  - description: Date to filter trades.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/CongressTradesResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get congressional trading data
-    /correlations:
-    get:
-    description: Retrieve correlation data between different stocks or assets.
-    operationId: getCorrelations
-    parameters:
-
-  - description: Comma-separated list of stock symbols.
-    in: query
-    name: symbols
-    required: true
-    schema:
-    type: string
-
-  - description: Start date for the correlation data.
-    in: query
-    name: startDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: End date for the correlation data.
-    in: query
-    name: endDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: Data interval (e.g., '1d', '1wk').
-    in: query
-    name: interval
-    required: false
-    schema:
-    enum:
-
-    * 1d
-
-    * 1wk
-
-    * 1mo
-      type: string
-      responses:
-      '200':
-      content:
-      application/json:
-      schema:
-      $ref: '#/components/schemas/CorrelationsResponse'
-      description: Successful response
-      '400':
-      description: Invalid request
-      '401':
-      description: Unauthorized
-      summary: Get correlations data
-      /darkpool/transactions:
-      get:
-      description: Retrieve dark pool transactions data.
-      operationId: getDarkPoolTransactions
-
-  * description: Start date for the economic calendar data.
-    in: query
-    name: startDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: End date for the economic calendar data.
-    in: query
-    name: endDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  * description: Country to filter events.
-    in: query
-    name: country
-    required: false
-    schema:
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/EconomicCalendarResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get economic calendar data
-    /calendar/fda:
-    get:
-    description: Retrieve upcoming FDA approval dates and drug event data.
-    operationId: getFDACalendar
-
-  - Purchase
-
-  - Sale
-
-  - Exchange
-    type: string
-    type: object
-    CongressTradesResponse:
-    properties:
-    trades:
-    items:
-    $ref: '#/components/schemas/CongressTrade'
-    type: array
-    type: object
-    CorrelationsResponse:
-    properties:
-    correlationMatrix:
-    items:
-    items:
-    type: number
-    type: array
-    type: array
-    symbols:
-    items:
-    type: string
-    type: array
-    type: object
-    DarkPoolTransaction:
-    properties:
-    exchange:
-    type: string
-    price:
-    type: number
-    size:
-    type: integer
-    symbol:
-    type: string
-    timestamp:
-    format: date-time
-    type: string
-    type: object
-    DarkPoolTransactionsResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/DarkPoolTransaction'
-    type: array
-    type: object
-    DividendData:
-    properties:
-    amount:
-    type: number
-    declarationDate:
-    format: date
-    type: string
-    exDividendDate:
-    format: date
-    type: string
-    paymentDate:
-    format: date
-    type: string
-    recordDate:
-    format: date
-    type: string
-    type: object
-    DividendDataResponse:
-    properties:
-    dividends:
-    items:
-    $ref: '#/components/schemas/DividendData'
-    type: array
-    symbol:
-    type: string
-    type: object
-    ETFHolding:
-    properties:
-    name:
-    type: string
-    shares:
-    type: number
-    symbol:
-    type: string
-    weight:
-    type: number
-    type: object
-    ETFHoldingsResponse:
-    properties:
-    etf:
-    type: string
-    holdings:
-    items:
-    $ref: '#/components/schemas/ETFHolding'
-    type: array
-    type: object
-    ETFListResponse:
-    properties:
-    etfs:
-    items:
-    type: string
-    type: array
-    type: object
-    ETFTideData:
-    properties:
-    etfSymbol:
-    type: string
-    inflow:
-    type: number
-    netFlow:
-    type: number
-    outflow:
-    type: number
-    type: object
-    ETFTideResponse:
-    properties:
-    date:
-    format: date
-    type: string
-    etfs:
-    items:
-    $ref: '#/components/schemas/ETFTideData'
-    type: array
-    inflows:
-    type: number
-    netFlow:
-    type: number
-    outflows:
-    type: number
-    type: object
-    EarningsData:
-    properties:
-    estimatedEPS:
-    type: number
-    fiscalDateEnding:
-    format: date
-    type: string
-    reportedEPS:
-    type: number
-    surprise:
-    type: number
-    surprisePercentage:
-    type: number
-    type: object
-    EarningsDataResponse:
-    properties:
-    earnings:
-    items:
-    $ref: '#/components/schemas/EarningsData'
-    type: array
-    symbol:
-    type: string
-    type: object
-    EconomicCalendarResponse:
-    properties:
-    events:
-    items:
-    $ref: '#/components/schemas/EconomicEvent'
-    type: array
-    type: object
-    EconomicEvent:
-    properties:
-    actual:
-    type: string
-    country:
-    type: string
-    dateTime:
-    format: date-time
-    type: string
-    event:
-    type: string
-    forecast:
-    type: string
-    previous:
-    type: string
-    type: object
-    FDACalendarResponse:
-    properties:
-    events:
-    items:
-    $ref: '#/components/schemas/FDAEvent'
-    type: array
-    type: object
-    FDAEvent:
-    properties:
-    date:
-    format: date
-    type: string
-    drugName:
-    type: string
-    event:
-    type: string
-    status:
-    type: string
-    symbol:
-    type: string
-    type: object
-    FinancialStatementsResponse:
-    properties:
-    period:
-    type: string
-    statementType:
-    type: string
-    statements:
-    items:
-    additionalProperties: true
-    type: object
-    type: array
-    symbol:
-    type: string
-    type: object
-    HistoricalOptionData:
-    properties:
-    close:
-    type: number
-    date:
-    format: date
-    type: string
-    expirationDate:
-    format: date
-    type: string
-    high:
-    type: number
-    low:
-    type: number
-    open:
-    type: number
-    openInterest:
-    type: integer
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    volume:
-    type: integer
-    type: object
-    HistoricalOptionsResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/HistoricalOptionData'
-    type: array
-    symbol:
-    type: string
-    type: object
-    HistoricalStockDataPoint:
-    properties:
-    adjustedClose:
-    type: number
-    close:
-    type: number
-    date:
-    format: date-time
-    type: string
-    high:
-    type: number
-    low:
-    type: number
-    open:
-    type: number
-    volume:
-    type: integer
-    type: object
-    HistoricalStockDataResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/HistoricalStockDataPoint'
-    type: array
-    symbol:
-    type: string
-    type: object
-    InsiderTrade:
-    properties:
-    date:
-    format: date
-    type: string
-    insider:
-    type: string
-    sharesTraded:
-    type: integer
-    symbol:
-    type: string
-    tradePrice:
-    type: number
-    transactionType:
-    enum:
-
-  - Buy
-
-  - Sell
-    type: string
-    type: object
-    InsiderTradesResponse:
-    properties:
-    trades:
-    items:
-    $ref: '#/components/schemas/InsiderTrade'
-    type: array
-    type: object
-    InstitutionTrade:
-    properties:
-    amount:
-    type: string
-    institution:
-    type: string
-    reportDate:
-    format: date
-    type: string
-    symbol:
-    type: string
-    transactionDate:
-    format: date
-    type: string
-    transactionType:
-    enum:
-
-  - Buy
-
-  - Sell
-    type: string
-    type: object
-    InstitutionTradesResponse:
-    properties:
-    trades:
-    items:
-    $ref: '#/components/schemas/InstitutionTrade'
-    type: array
-    type: object
-    InstitutionalActivity:
-    properties:
-    change:
-    type: number
-    date:
-    format: date
-    type: string
-    institution:
-    type: string
-    shares:
-    type: integer
-    symbol:
-    type: string
-    value:
-    type: number
-    type: object
-    InstitutionalActivityResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/InstitutionalActivity'
-    type: array
-    type: object
-    InstitutionsListResponse:
-    properties:
-    institutions:
-    items:
-    type: string
-    type: array
-    type: object
-    MarketIndex:
-    properties:
-    change:
-    type: number
-    name:
-    type: string
-    percentChange:
-    type: number
-    price:
-    type: number
-    symbol:
-    type: string
-    type: object
-    MarketIndicesResponse:
-    properties:
-    indices:
-    items:
-    $ref: '#/components/schemas/MarketIndex'
-    type: array
-    type: object
-    MarketMover:
-    properties:
-    change:
-    type: number
-    companyName:
-    type: string
-    percentChange:
-    type: number
-    price:
-    type: number
-    symbol:
-    type: string
-    volume:
-    type: integer
-    type: object
-    MarketMoversResponse:
-    properties:
-    movers:
-    items:
-    $ref: '#/components/schemas/MarketMover'
-    type: array
-    type:
-    description: gainers or losers
-    type: string
-    type: object
-    MarketNewsResponse:
-    properties:
-    articles:
-    items:
-    $ref: '#/components/schemas/Article'
-    type: array
-    type: object
-    MarketOverviewResponse:
-    properties:
-    indices:
-    items:
-    $ref: '#/components/schemas/MarketIndex'
-    type: array
-    marketStatus:
-    description: Current market status (e.g., Open, Closed).
-    type: string
-    timestamp:
-    format: date-time
-    type: string
-    type: object
-    MarketSector:
-    properties:
-    change:
-    type: number
-    percentChange:
-    type: number
-    sector:
-    type: string
-    type: object
-    MarketSectorsResponse:
-    properties:
-    sectors:
-    items:
-    $ref: '#/components/schemas/MarketSector'
-    type: array
-    timeFrame:
-    type: string
-    type: object
-    NewsResponse:
-    properties:
-    articles:
-    items:
-    $ref: '#/components/schemas/Article'
-    type: array
-    type: object
-    OIChangeData:
-    properties:
-    date:
-    format: date
-    type: string
-    expirationDate:
-    format: date
-    type: string
-    oiChange:
-    type: integer
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    strikePrice:
-    type: number
-    type: object
-    OIChangeResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/OIChangeData'
-    type: array
-    symbol:
-    type: string
-    type: object
-    OptionChainResponse:
-    properties:
-    expirationDate:
-    format: date
-    type: string
-    options:
-    items:
-    $ref: '#/components/schemas/OptionContract'
-    type: array
-    symbol:
-    type: string
-    type: object
-    OptionContract:
-    properties:
-    ask:
-    type: number
-    bid:
-    type: number
-    expirationDate:
-    format: date
-    type: string
-    lastPrice:
-    type: number
-    openInterest:
-    type: integer
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    volume:
-    type: integer
-    type: object
-    OptionContractDetails:
-    properties:
-    ask:
-    type: number
-    bid:
-    type: number
-    delta:
-    type: number
-    expirationDate:
-    format: date
-    type: string
-    gamma:
-    type: number
-    impliedVolatility:
-    type: number
-    lastPrice:
-    type: number
-    openInterest:
-    type: integer
-    optionSymbol:
-    type: string
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    rho:
-    type: number
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    theta:
-    type: number
-    vega:
-    type: number
-    volume:
-    type: integer
-    type: object
-    OptionContractDetailsResponse:
-    properties:
-    optionContract:
-    $ref: '#/components/schemas/OptionContractDetails'
-    type: object
-    OptionContractSummary:
-    properties:
-    ask:
-    type: number
-    bid:
-    type: number
-    expirationDate:
-    format: date
-    type: string
-    lastPrice:
-    type: number
-    openInterest:
-    type: integer
-    optionSymbol:
-    type: string
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    volume:
-    type: integer
-    type: object
-    OptionContractsResponse:
-    properties:
-    contracts:
-    items:
-    $ref: '#/components/schemas/OptionContractSummary'
-    type: array
-    type: object
-    OptionExpirationsResponse:
-    properties:
-    expirations:
-    items:
-    format: date
-    type: string
-    type: array
-    symbol:
-    type: string
-    type: object
-    OptionFlow:
-    properties:
-    expirationDate:
-    format: date
-    type: string
-    openInterest:
-    type: integer
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    premium:
-    type: number
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    timestamp:
-    format: date-time
-    type: string
-    volume:
-    type: integer
-    type: object
-    OptionGreek:
-    properties:
-    delta:
-    type: number
-    expirationDate:
-    format: date
-    type: string
-    gamma:
-    type: number
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    rho:
-    type: number
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    theta:
-    type: number
-    vega:
-    type: number
-    type: object
-    OptionGreekFlow:
-    properties:
-    delta:
-    type: number
-    expirationDate:
-    format: date
-    type: string
-    gamma:
-    type: number
-    optionType:
-    enum:
-
-  - CALL
-
-  - PUT
-    type: string
-    premium:
-    type: number
-    rho:
-    type: number
-    strikePrice:
-    type: number
-    symbol:
-    type: string
-    theta:
-    type: number
-    timestamp:
-    format: date-time
-    type: string
-    vega:
-    type: number
-    type: object
-    OptionGreeksResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/OptionGreek'
-    type: array
-    symbol:
-    type: string
-    type: object
-    OptionsFlowResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/OptionFlow'
-    type: array
-    type: object
-    OptionsGreekFlowByExpiryResponse:
-    properties:
-    expirationDate:
-    format: date
-    type: string
-    symbol:
-    type: string
-    totalDelta:
-    type: number
-    totalGamma:
-    type: number
-    totalPremium:
-    type: number
-    totalRho:
-    type: number
-    totalTheta:
-    type: number
-    totalVega:
-    type: number
-    type: object
-    OptionsGreekFlowResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/OptionGreekFlow'
-    type: array
-    type: object
-    ScreenerCriterion:
-    properties:
-    field:
-    description: The field to apply the criterion on.
-    type: string
-    operator:
-    description: The comparison operator.
-    enum:
-
-  - eq
-
-  - neq
-
-  - gt
-
-  - gte
-
-  - lt
-
-  - lte
-
-  - in
-
-  - nin
-    type: string
-    value:
-    description: The value to compare the field against.
-    type: string
-    type: object
-    SeasonalityDataPoint:
-    properties:
-    averageReturn:
-    description: Average return during the period.
-    type: number
-    period:
-    description: The period identifier (e.g., month or week number).
-    type: string
-    totalPeriods:
-    description: Total number of periods analyzed.
-    type: integer
-    winRate:
-    description: Percentage of times the stock had a positive return during the
-    period.
-    type: number
-    type: object
-    SectorETF:
-    properties:
-    dividendYield:
-    type: number
-    etfName:
-    type: string
-    etfSymbol:
-    type: string
-    expenseRatio:
-    type: number
-    inceptionDate:
-    format: date
-    type: string
-    netAssets:
-    type: number
-    type: object
-    SectorETFsResponse:
-    properties:
-    etfs:
-    items:
-    $ref: '#/components/schemas/SectorETF'
-    type: array
-    sector:
-    type: string
-    type: object
-    SectorListResponse:
-    properties:
-    sectors:
-    items:
-    type: string
-    type: array
-    type: object
-    SpikeData:
-    properties:
-    priceSpike:
-    type: number
-    symbol:
-    type: string
-    timestamp:
-    format: date-time
-    type: string
-    volumeSpike:
-    type: number
-    type: object
-    SpikeDetectionResponse:
-    properties:
-    spikes:
-    items:
-    $ref: '#/components/schemas/SpikeData'
-    type: array
-    type: object
-    StockPriceResponse:
-    properties:
-    price:
-    type: number
-    symbol:
-    type: string
-    timestamp:
-    format: date-time
-    type: string
-    type: object
-    StockQuoteResponse:
-    properties:
-    change:
-    type: number
-    changePercent:
-    type: number
-    high:
-    type: number
-    low:
-    type: number
-    open:
-    type: number
-    previousClose:
-    type: number
-    price:
-    type: number
-    symbol:
-    type: string
-    timestamp:
-    format: date-time
-    type: string
-    volume:
-    type: integer
-    type: object
-    StockScreenerRequest:
-    properties:
-    criteria:
-    items:
-    $ref: '#/components/schemas/ScreenerCriterion'
-    type: array
-    type: object
-    StockScreenerResponse:
-    properties:
-    data:
-    items:
-    $ref: '#/components/schemas/StockScreenerResult'
-    type: array
-    type: object
-    StockScreenerResult:
-    properties:
-    companyName:
-    type: string
-    industry:
-    type: string
-    marketCap:
-    type: number
-    price:
-    type: number
-    sector:
-    type: string
-    symbol:
-    type: string
-    volume:
-    type: number
-    type: object
-    StockSeasonalityResponse:
-    properties:
-    seasonalityData:
-    items:
-    $ref: '#/components/schemas/SeasonalityDataPoint'
-    type: array
-    symbol:
-    type: string
-    timeFrame:
-    description: The time frame of the seasonality data.
-    type: string
-    type: object
-    TotalOptionsVolumeResponse:
-    properties:
-    date:
-    format: date
-    type: string
-    symbols:
-    items:
-    $ref: '#/components/schemas/TotalOptionsVolumeSymbolData'
-    type: array
-    totalVolume:
-    type: integer
-    type: object
-    TotalOptionsVolumeSymbolData:
-    properties:
-    symbol:
-    type: string
-    volume:
-    type: integer
-    type: object
-    paths:
-    /analyst/ratings/{symbol}:
-    get:
-    description: Retrieve analyst ratings and recommendations for a specific stock symbol.
-    operationId: getAnalystRatings
-    parameters:
-
-  - description: Stock symbol to retrieve analyst ratings for.
-    in: path
-    name: symbol
-    required: true
-    schema:
-    type: string
-
-  - description: Start date for filtering analyst ratings.
-    in: query
-    name: startDate
-    required: false
-    schema:
-    format: date
-    type: string
-
-  - description: End date for filtering analyst ratings.
-    in: query
-    name: endDate
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/AnalystRatingsResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get analyst ratings for a stock
-    /analyst/upgrades\_downgrades:
-    get:
-    description: Retrieve recent analyst upgrades and downgrades across all stocks.
-    operationId: getAnalystUpgradesDowngrades
-    parameters:
-
-  - description: Date to filter upgrades and downgrades.
-    in: query
-    name: date
-    required: false
-    schema:
-    format: date
-    type: string
-    responses:
-    '200':
-    content:
-    application/json:
-    schema:
-    $ref: '#/components/schemas/AnalystUpgradesDowngradesResponse'
-    description: Successful response
-    '400':
-    description: Invalid request
-    '401':
-    description: Unauthorized
-    summary: Get recent analyst upgrades and downgrades
-    /calendar/economic:
-    get:
-    description: Retrieve upcoming economic events and data releases.
-    operationId: getEconomicCalendar
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UnusualWhales API",
+    "version": "1.0.0",
+    "description": "API for accessing options flow, stock data, congressional and institutional trading information, dark pool data, ETF holdings, stock screener functionality, seasonality data, detailed options data, analyst ratings, market data, option contract details, and comprehensive stock information from UnusualWhales.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.unusualwhales.com"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    },
+    "schemas": {
+      "AnalystRating": {
+        "properties": {
+          "action": {
+            "description": "The action taken (e.g., Initiated, Upgraded, Downgraded).",
+            "type": "string"
+          },
+          "analyst": {
+            "type": "string"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "priceTarget": {
+            "description": "The price target set by the analyst.",
+            "type": "number"
+          },
+          "rating": {
+            "description": "Analyst's rating (e.g., Buy, Hold, Sell).",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnalystRatingsResponse": {
+        "properties": {
+          "ratings": {
+            "items": {
+              "$ref": "#/components/schemas/AnalystRating"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnalystUpgradesDowngradesResponse": {
+        "properties": {
+          "upgradesDowngrades": {
+            "items": {
+              "$ref": "#/components/schemas/AnalystRating"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Article": {
+        "properties": {
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CompanyProfileResponse": {
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "ceo": {
+            "type": "string"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "employees": {
+            "type": "integer"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "sector": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "website": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CongressMembersResponse": {
+        "properties": {
+          "members": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CongressTrade": {
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "disclosureDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "member": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "transactionDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "transactionType": {
+            "enum": [
+              "Purchase",
+              "Sale",
+              "Exchange"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CongressTradesResponse": {
+        "properties": {
+          "trades": {
+            "items": {
+              "$ref": "#/components/schemas/CongressTrade"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CorrelationsResponse": {
+        "properties": {
+          "correlationMatrix": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "symbols": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DarkPoolTransaction": {
+        "properties": {
+          "exchange": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DarkPoolTransactionsResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/DarkPoolTransaction"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DividendData": {
+        "properties": {
+          "amount": {
+            "type": "number"
+          },
+          "declarationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "exDividendDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "paymentDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "recordDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DividendDataResponse": {
+        "properties": {
+          "dividends": {
+            "items": {
+              "$ref": "#/components/schemas/DividendData"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ETFHolding": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "shares": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ETFHoldingsResponse": {
+        "properties": {
+          "etf": {
+            "type": "string"
+          },
+          "holdings": {
+            "items": {
+              "$ref": "#/components/schemas/ETFHolding"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ETFListResponse": {
+        "properties": {
+          "etfs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ETFTideData": {
+        "properties": {
+          "etfSymbol": {
+            "type": "string"
+          },
+          "inflow": {
+            "type": "number"
+          },
+          "netFlow": {
+            "type": "number"
+          },
+          "outflow": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ETFTideResponse": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "etfs": {
+            "items": {
+              "$ref": "#/components/schemas/ETFTideData"
+            },
+            "type": "array"
+          },
+          "inflows": {
+            "type": "number"
+          },
+          "netFlow": {
+            "type": "number"
+          },
+          "outflows": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "EarningsData": {
+        "properties": {
+          "estimatedEPS": {
+            "type": "number"
+          },
+          "fiscalDateEnding": {
+            "format": "date",
+            "type": "string"
+          },
+          "reportedEPS": {
+            "type": "number"
+          },
+          "surprise": {
+            "type": "number"
+          },
+          "surprisePercentage": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "EarningsDataResponse": {
+        "properties": {
+          "earnings": {
+            "items": {
+              "$ref": "#/components/schemas/EarningsData"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EconomicCalendarResponse": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/EconomicEvent"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "EconomicEvent": {
+        "properties": {
+          "actual": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "dateTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "forecast": {
+            "type": "string"
+          },
+          "previous": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FDACalendarResponse": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/FDAEvent"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "FDAEvent": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "drugName": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "FinancialStatementsResponse": {
+        "properties": {
+          "period": {
+            "type": "string"
+          },
+          "statementType": {
+            "type": "string"
+          },
+          "statements": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HistoricalOptionData": {
+        "properties": {
+          "close": {
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "high": {
+            "type": "number"
+          },
+          "low": {
+            "type": "number"
+          },
+          "open": {
+            "type": "number"
+          },
+          "openInterest": {
+            "type": "integer"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "HistoricalOptionsResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/HistoricalOptionData"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HistoricalStockDataPoint": {
+        "properties": {
+          "adjustedClose": {
+            "type": "number"
+          },
+          "close": {
+            "type": "number"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "high": {
+            "type": "number"
+          },
+          "low": {
+            "type": "number"
+          },
+          "open": {
+            "type": "number"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "HistoricalStockDataResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/HistoricalStockDataPoint"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InsiderTrade": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "insider": {
+            "type": "string"
+          },
+          "sharesTraded": {
+            "type": "integer"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "tradePrice": {
+            "type": "number"
+          },
+          "transactionType": {
+            "enum": [
+              "Buy",
+              "Sell"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InsiderTradesResponse": {
+        "properties": {
+          "trades": {
+            "items": {
+              "$ref": "#/components/schemas/InsiderTrade"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InstitutionTrade": {
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "institution": {
+            "type": "string"
+          },
+          "reportDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "transactionDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "transactionType": {
+            "enum": [
+              "Buy",
+              "Sell"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InstitutionTradesResponse": {
+        "properties": {
+          "trades": {
+            "items": {
+              "$ref": "#/components/schemas/InstitutionTrade"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InstitutionalActivity": {
+        "properties": {
+          "change": {
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "institution": {
+            "type": "string"
+          },
+          "shares": {
+            "type": "integer"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "InstitutionalActivityResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/InstitutionalActivity"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InstitutionsListResponse": {
+        "properties": {
+          "institutions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MarketIndex": {
+        "properties": {
+          "change": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "percentChange": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MarketIndicesResponse": {
+        "properties": {
+          "indices": {
+            "items": {
+              "$ref": "#/components/schemas/MarketIndex"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MarketMover": {
+        "properties": {
+          "change": {
+            "type": "number"
+          },
+          "companyName": {
+            "type": "string"
+          },
+          "percentChange": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "MarketMoversResponse": {
+        "properties": {
+          "movers": {
+            "items": {
+              "$ref": "#/components/schemas/MarketMover"
+            },
+            "type": "array"
+          },
+          "type": {
+            "description": "gainers or losers",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MarketNewsResponse": {
+        "properties": {
+          "articles": {
+            "items": {
+              "$ref": "#/components/schemas/Article"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "MarketOverviewResponse": {
+        "properties": {
+          "indices": {
+            "items": {
+              "$ref": "#/components/schemas/MarketIndex"
+            },
+            "type": "array"
+          },
+          "marketStatus": {
+            "description": "Current market status (e.g., Open, Closed).",
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MarketSector": {
+        "properties": {
+          "change": {
+            "type": "number"
+          },
+          "percentChange": {
+            "type": "number"
+          },
+          "sector": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MarketSectorsResponse": {
+        "properties": {
+          "sectors": {
+            "items": {
+              "$ref": "#/components/schemas/MarketSector"
+            },
+            "type": "array"
+          },
+          "timeFrame": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NewsResponse": {
+        "properties": {
+          "articles": {
+            "items": {
+              "$ref": "#/components/schemas/Article"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "OIChangeData": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "oiChange": {
+            "type": "integer"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "strikePrice": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "OIChangeResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OIChangeData"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OptionChainResponse": {
+        "properties": {
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/OptionContract"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OptionContract": {
+        "properties": {
+          "ask": {
+            "type": "number"
+          },
+          "bid": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lastPrice": {
+            "type": "number"
+          },
+          "openInterest": {
+            "type": "integer"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "OptionContractDetails": {
+        "properties": {
+          "ask": {
+            "type": "number"
+          },
+          "bid": {
+            "type": "number"
+          },
+          "delta": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "gamma": {
+            "type": "number"
+          },
+          "impliedVolatility": {
+            "type": "number"
+          },
+          "lastPrice": {
+            "type": "number"
+          },
+          "openInterest": {
+            "type": "integer"
+          },
+          "optionSymbol": {
+            "type": "string"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "rho": {
+            "type": "number"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "theta": {
+            "type": "number"
+          },
+          "vega": {
+            "type": "number"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "OptionContractDetailsResponse": {
+        "properties": {
+          "optionContract": {
+            "$ref": "#/components/schemas/OptionContractDetails"
+          }
+        },
+        "type": "object"
+      },
+      "OptionContractSummary": {
+        "properties": {
+          "ask": {
+            "type": "number"
+          },
+          "bid": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lastPrice": {
+            "type": "number"
+          },
+          "openInterest": {
+            "type": "integer"
+          },
+          "optionSymbol": {
+            "type": "string"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "OptionContractsResponse": {
+        "properties": {
+          "contracts": {
+            "items": {
+              "$ref": "#/components/schemas/OptionContractSummary"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "OptionExpirationsResponse": {
+        "properties": {
+          "expirations": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OptionFlow": {
+        "properties": {
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "openInterest": {
+            "type": "integer"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "premium": {
+            "type": "number"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "OptionGreek": {
+        "properties": {
+          "delta": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "gamma": {
+            "type": "number"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "rho": {
+            "type": "number"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "theta": {
+            "type": "number"
+          },
+          "vega": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "OptionGreekFlow": {
+        "properties": {
+          "delta": {
+            "type": "number"
+          },
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "gamma": {
+            "type": "number"
+          },
+          "optionType": {
+            "enum": [
+              "CALL",
+              "PUT"
+            ],
+            "type": "string"
+          },
+          "premium": {
+            "type": "number"
+          },
+          "rho": {
+            "type": "number"
+          },
+          "strikePrice": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "theta": {
+            "type": "number"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "vega": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "OptionGreeksResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OptionGreek"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "OptionsFlowResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OptionFlow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "OptionsGreekFlowByExpiryResponse": {
+        "properties": {
+          "expirationDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "totalDelta": {
+            "type": "number"
+          },
+          "totalGamma": {
+            "type": "number"
+          },
+          "totalPremium": {
+            "type": "number"
+          },
+          "totalRho": {
+            "type": "number"
+          },
+          "totalTheta": {
+            "type": "number"
+          },
+          "totalVega": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "OptionsGreekFlowResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/OptionGreekFlow"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScreenerCriterion": {
+        "properties": {
+          "field": {
+            "description": "The field to apply the criterion on.",
+            "type": "string"
+          },
+          "operator": {
+            "description": "The comparison operator.",
+            "enum": [
+              "eq",
+              "neq",
+              "gt",
+              "gte",
+              "lt",
+              "lte",
+              "in",
+              "nin"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "description": "The value to compare the field against.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SeasonalityDataPoint": {
+        "properties": {
+          "averageReturn": {
+            "description": "Average return during the period.",
+            "type": "number"
+          },
+          "period": {
+            "description": "The period identifier (e.g., month or week number).",
+            "type": "string"
+          },
+          "totalPeriods": {
+            "description": "Total number of periods analyzed.",
+            "type": "integer"
+          },
+          "winRate": {
+            "description": "Percentage of times the stock had a positive return during the\nperiod.",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SectorETF": {
+        "properties": {
+          "dividendYield": {
+            "type": "number"
+          },
+          "etfName": {
+            "type": "string"
+          },
+          "etfSymbol": {
+            "type": "string"
+          },
+          "expenseRatio": {
+            "type": "number"
+          },
+          "inceptionDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "netAssets": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SectorETFsResponse": {
+        "properties": {
+          "etfs": {
+            "items": {
+              "$ref": "#/components/schemas/SectorETF"
+            },
+            "type": "array"
+          },
+          "sector": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SectorListResponse": {
+        "properties": {
+          "sectors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SpikeData": {
+        "properties": {
+          "priceSpike": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "volumeSpike": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "SpikeDetectionResponse": {
+        "properties": {
+          "spikes": {
+            "items": {
+              "$ref": "#/components/schemas/SpikeData"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StockPriceResponse": {
+        "properties": {
+          "price": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StockQuoteResponse": {
+        "properties": {
+          "change": {
+            "type": "number"
+          },
+          "changePercent": {
+            "type": "number"
+          },
+          "high": {
+            "type": "number"
+          },
+          "low": {
+            "type": "number"
+          },
+          "open": {
+            "type": "number"
+          },
+          "previousClose": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "StockScreenerRequest": {
+        "properties": {
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/ScreenerCriterion"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StockScreenerResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/StockScreenerResult"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "StockScreenerResult": {
+        "properties": {
+          "companyName": {
+            "type": "string"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "marketCap": {
+            "type": "number"
+          },
+          "price": {
+            "type": "number"
+          },
+          "sector": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "StockSeasonalityResponse": {
+        "properties": {
+          "seasonalityData": {
+            "items": {
+              "$ref": "#/components/schemas/SeasonalityDataPoint"
+            },
+            "type": "array"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "timeFrame": {
+            "description": "The time frame of the seasonality data.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TotalOptionsVolumeResponse": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "symbols": {
+            "items": {
+              "$ref": "#/components/schemas/TotalOptionsVolumeSymbolData"
+            },
+            "type": "array"
+          },
+          "totalVolume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TotalOptionsVolumeSymbolData": {
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/analyst/ratings/{symbol}": {
+      "get": {
+        "description": "Retrieve analyst ratings and recommendations for a specific stock symbol.",
+        "operationId": "getAnalystRatings",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve analyst ratings for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date for filtering analyst ratings.",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for filtering analyst ratings.",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalystRatingsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get analyst ratings for a stock"
+      }
+    },
+    "/analyst/upgrades_downgrades": {
+      "get": {
+        "description": "Retrieve recent analyst upgrades and downgrades across all stocks.",
+        "operationId": "getAnalystUpgradesDowngrades",
+        "parameters": [
+          {
+            "description": "Date to filter upgrades and downgrades.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalystUpgradesDowngradesResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get recent analyst upgrades and downgrades"
+      }
+    },
+    "/calendar/economic": {
+      "get": {
+        "description": "Retrieve upcoming economic events and data releases.",
+        "operationId": "getEconomicCalendar",
+        "parameters": [
+          {
+            "description": "Start date for the economic calendar data.",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for the economic calendar data.",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Country to filter events.",
+            "in": "query",
+            "name": "country",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EconomicCalendarResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get economic calendar data"
+      }
+    },
+    "/calendar/fda": {
+      "get": {
+        "description": "Retrieve upcoming FDA approval dates and drug event data.",
+        "operationId": "getFDACalendar",
+        "parameters": [
+          {
+            "description": "Start date for the FDA calendar data.",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for the FDA calendar data.",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Stock symbol to filter FDA events.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FDACalendarResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get FDA calendar data"
+      }
+    },
+    "/congress/members": {
+      "get": {
+        "description": "Retrieve a list of Congress members who have reported trades.",
+        "operationId": "getCongressMembers",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CongressMembersResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get list of Congress members"
+      }
+    },
+    "/congress/trades": {
+      "get": {
+        "description": "Retrieve trading data reported by members of Congress.",
+        "operationId": "getCongressTrades",
+        "parameters": [
+          {
+            "description": "Name of the Congress member to filter trades.",
+            "in": "query",
+            "name": "member",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Stock symbol to filter trades.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter trades.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CongressTradesResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get congressional trading data"
+      }
+    },
+    "/correlations": {
+      "get": {
+        "description": "Retrieve correlation data between different stocks or assets.",
+        "operationId": "getCorrelations",
+        "parameters": [
+          {
+            "description": "Comma-separated list of stock symbols.",
+            "in": "query",
+            "name": "symbols",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date for the correlation data.",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for the correlation data.",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Data interval (e.g., '1d', '1wk').",
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "enum": [
+                "1d",
+                "1wk",
+                "1mo"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorrelationsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get correlations data"
+      }
+    },
+    "/darkpool/transactions": {
+      "get": {
+        "description": "Retrieve dark pool transactions data.",
+        "operationId": "getDarkPoolTransactions",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter dark pool transactions.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter dark pool transactions.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DarkPoolTransactionsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get dark pool transactions"
+      }
+    },
+    "/darkpool/transactions/{symbol}": {
+      "get": {
+        "description": "Retrieve dark pool transactions for a specific symbol.",
+        "operationId": "getDarkPoolTransactionsBySymbol",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve dark pool transactions for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter dark pool transactions.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DarkPoolTransactionsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get dark pool transactions for a symbol"
+      }
+    },
+    "/etf/holdings": {
+      "get": {
+        "description": "Retrieve holdings data for ETFs.",
+        "operationId": "getETFHoldings",
+        "parameters": [
+          {
+            "description": "ETF symbol to retrieve holdings for.",
+            "in": "query",
+            "name": "etf",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter ETF holdings.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ETFHoldingsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get ETF holdings data"
+      }
+    },
+    "/etf/list": {
+      "get": {
+        "description": "Retrieve a list of ETFs available.",
+        "operationId": "getETFList",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ETFListResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get list of ETFs"
+      }
+    },
+    "/etf/sectors": {
+      "get": {
+        "description": "Retrieve data for ETFs categorized by sectors.",
+        "operationId": "getSectorETFs",
+        "parameters": [
+          {
+            "description": "Sector to filter ETFs.",
+            "in": "query",
+            "name": "sector",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter sector ETF data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorETFsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get sector ETFs data"
+      }
+    },
+    "/etf/sectors/list": {
+      "get": {
+        "description": "Retrieve a list of available sectors for ETFs.",
+        "operationId": "getSectorList",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectorListResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get list of sectors"
+      }
+    },
+    "/etf/tide": {
+      "get": {
+        "description": "Retrieve data showing ETF inflows and outflows.",
+        "operationId": "getETFTide",
+        "parameters": [
+          {
+            "description": "Date to filter ETF tide data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "ETF symbol to filter data.",
+            "in": "query",
+            "name": "etf",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ETFTideResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get ETF tide data"
+      }
+    },
+    "/insider/trades": {
+      "get": {
+        "description": "Retrieve data on insider buys and sells.",
+        "operationId": "getInsiderTrades",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter insider trades.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the insider.",
+            "in": "query",
+            "name": "insider",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter insider trades.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of transaction (Buy or Sell).",
+            "in": "query",
+            "name": "transactionType",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Buy",
+                "Sell"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InsiderTradesResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get insider trading data"
+      }
+    },
+    "/institutional/activity": {
+      "get": {
+        "description": "Retrieve data on institutional trading activity.",
+        "operationId": "getInstitutionalActivity",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter institutional activity.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter institutional activity.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Name of the institution.",
+            "in": "query",
+            "name": "institution",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionalActivityResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get institutional activity data"
+      }
+    },
+    "/institutions/list": {
+      "get": {
+        "description": "Retrieve a list of institutions that have reported trades.",
+        "operationId": "getInstitutionsList",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionsListResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get list of institutions"
+      }
+    },
+    "/institutions/trades": {
+      "get": {
+        "description": "Retrieve trading data reported by institutions.",
+        "operationId": "getInstitutionTrades",
+        "parameters": [
+          {
+            "description": "Name of the institution to filter trades.",
+            "in": "query",
+            "name": "institution",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Stock symbol to filter trades.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter trades.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionTradesResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get institutional trading data"
+      }
+    },
+    "/market/indices": {
+      "get": {
+        "description": "Retrieve data on major market indices.",
+        "operationId": "getMarketIndices",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketIndicesResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get major market indices data"
+      }
+    },
+    "/market/movers": {
+      "get": {
+        "description": "Retrieve top gainers and losers in the market.",
+        "operationId": "getMarketMovers",
+        "parameters": [
+          {
+            "description": "Type of movers to retrieve ('gainers' or 'losers').",
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "gainers",
+                "losers"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of records to retrieve.",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketMoversResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get top market movers"
+      }
+    },
+    "/market/news": {
+      "get": {
+        "description": "Retrieve the latest news affecting the overall market.",
+        "operationId": "getMarketNews",
+        "parameters": [
+          {
+            "description": "Date to filter news articles.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketNewsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get market-wide news"
+      }
+    },
+    "/market/overview": {
+      "get": {
+        "description": "Retrieve an overview of the current market status.",
+        "operationId": "getMarketOverview",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketOverviewResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get market overview"
+      }
+    },
+    "/market/sectors": {
+      "get": {
+        "description": "Retrieve performance data for market sectors.",
+        "operationId": "getMarketSectors",
+        "parameters": [
+          {
+            "description": "Time frame for sector performance (e.g., 'daily', 'weekly').",
+            "in": "query",
+            "name": "timeFrame",
+            "required": false,
+            "schema": {
+              "enum": [
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketSectorsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get sector performance data"
+      }
+    },
+    "/news": {
+      "get": {
+        "description": "Retrieve the latest financial news.",
+        "operationId": "getNews",
+        "parameters": [
+          {
+            "description": "Comma-separated list of stock symbols to filter news.",
+            "in": "query",
+            "name": "symbols",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get latest news"
+      }
+    },
+    "/options/chain/{symbol}": {
+      "get": {
+        "description": "Retrieve the option chain data for a specific stock symbol.",
+        "operationId": "getOptionChain",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve option chain data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option expiration date to filter the option chain data.",
+            "in": "query",
+            "name": "expiration",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionChainResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get option chain data for a symbol"
+      }
+    },
+    "/options/contract/{optionSymbol}": {
+      "get": {
+        "description": "Retrieve detailed data for a specific option contract identified by\nits option symbol.",
+        "operationId": "getOptionContract",
+        "parameters": [
+          {
+            "description": "Option symbol to retrieve data for.",
+            "in": "path",
+            "name": "optionSymbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionContractDetailsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get detailed information about a specific option contract"
+      }
+    },
+    "/options/contracts": {
+      "get": {
+        "description": "Retrieve a list of option contracts based on specified filters.",
+        "operationId": "getOptionContracts",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter option contracts.",
+            "in": "query",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option expiration date to filter contracts.",
+            "in": "query",
+            "name": "expiration",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option strike price to filter contracts.",
+            "in": "query",
+            "name": "strike",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Option type (CALL or PUT) to filter contracts.",
+            "in": "query",
+            "name": "optionType",
+            "required": false,
+            "schema": {
+              "enum": [
+                "CALL",
+                "PUT"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionContractsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get option contracts based on filters"
+      }
+    },
+    "/options/expirations/{symbol}": {
+      "get": {
+        "description": "Retrieve available option expiration dates for a specific stock symbol.",
+        "operationId": "getOptionExpirations",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve option expiration dates for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionExpirationsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get option expiration dates for a symbol"
+      }
+    },
+    "/options/flow": {
+      "get": {
+        "description": "Retrieve options flow data.",
+        "operationId": "getOptionsFlow",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter the options flow data.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter the options flow data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionsFlowResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get options flow data"
+      }
+    },
+    "/options/flow/{symbol}": {
+      "get": {
+        "description": "Retrieve options flow data for a specific symbol.",
+        "operationId": "getOptionsFlowBySymbol",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve options flow data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter the options flow data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionsFlowResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get options flow data for a symbol"
+      }
+    },
+    "/options/greekflow": {
+      "get": {
+        "description": "Retrieve options flow data with Greek calculations.",
+        "operationId": "getOptionsGreekFlow",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter the Greek flow data.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter the Greek flow data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Minimum delta value.",
+            "in": "query",
+            "name": "minDelta",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Maximum delta value.",
+            "in": "query",
+            "name": "maxDelta",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionsGreekFlowResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get options Greek flow data"
+      }
+    },
+    "/options/greekflow/expiry": {
+      "get": {
+        "description": "Retrieve options Greek flow data aggregated by expiration date.",
+        "operationId": "getOptionsGreekFlowByExpiry",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter the Greek flow data.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter the Greek flow data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option expiration date.",
+            "in": "query",
+            "name": "expiration",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionsGreekFlowByExpiryResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get options Greek flow data by expiry"
+      }
+    },
+    "/options/greeks/{symbol}": {
+      "get": {
+        "description": "Retrieve option greeks data for a specific stock symbol.",
+        "operationId": "getOptionGreeks",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve option greeks data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option expiration date to filter the greeks data.",
+            "in": "query",
+            "name": "expiration",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option strike price to filter the greeks data.",
+            "in": "query",
+            "name": "strike",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Option type (CALL or PUT).",
+            "in": "query",
+            "name": "optionType",
+            "required": false,
+            "schema": {
+              "enum": [
+                "CALL",
+                "PUT"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptionGreeksResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get option greeks data for a symbol"
+      }
+    },
+    "/options/historical/{symbol}": {
+      "get": {
+        "description": "Retrieve historical options data for a specific stock symbol.",
+        "operationId": "getHistoricalOptions",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve historical options data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date for the historical data.",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for the historical data.",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option expiration date to filter the data.",
+            "in": "query",
+            "name": "expiration",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Option strike price to filter the data.",
+            "in": "query",
+            "name": "strike",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Option type (CALL or PUT).",
+            "in": "query",
+            "name": "optionType",
+            "required": false,
+            "schema": {
+              "enum": [
+                "CALL",
+                "PUT"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalOptionsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get historical options data for a symbol"
+      }
+    },
+    "/options/oi_change/{symbol}": {
+      "get": {
+        "description": "Retrieve open interest change data for a specific stock symbol.",
+        "operationId": "getOIChange",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve OI change data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter the OI change data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OIChangeResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get open interest change data for a symbol"
+      }
+    },
+    "/options/total_volume": {
+      "get": {
+        "description": "Retrieve total options volume for all symbols or a specific symbol.",
+        "operationId": "getTotalOptionsVolume",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter total options volume.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter total options volume.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TotalOptionsVolumeResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get total options volume data"
+      }
+    },
+    "/seasonality/stocks/{symbol}": {
+      "get": {
+        "description": "Retrieve seasonality data for a specific stock symbol.",
+        "operationId": "getStockSeasonality",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve seasonality data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Time frame for seasonality data (e.g., 'monthly', 'weekly').",
+            "in": "query",
+            "name": "timeFrame",
+            "required": false,
+            "schema": {
+              "enum": [
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockSeasonalityResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get seasonality data for a stock"
+      }
+    },
+    "/spike/detection": {
+      "get": {
+        "description": "Retrieve data on detected spikes in trading activity.",
+        "operationId": "getSpikeDetection",
+        "parameters": [
+          {
+            "description": "Stock symbol to filter spike data.",
+            "in": "query",
+            "name": "symbol",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Date to filter spike data.",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Threshold for spike detection.",
+            "in": "query",
+            "name": "threshold",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpikeDetectionResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get spike detection data"
+      }
+    },
+    "/stocks/company/{symbol}": {
+      "get": {
+        "description": "Retrieve detailed company information for a specific stock symbol.",
+        "operationId": "getCompanyProfile",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve company information for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyProfileResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get company profile"
+      }
+    },
+    "/stocks/dividends/{symbol}": {
+      "get": {
+        "description": "Retrieve dividend history for a specific stock symbol.",
+        "operationId": "getDividendData",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve dividend data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date for the dividend data.",
+            "in": "query",
+            "name": "startDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for the dividend data.",
+            "in": "query",
+            "name": "endDate",
+            "required": false,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DividendDataResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get dividend data"
+      }
+    },
+    "/stocks/earnings/{symbol}": {
+      "get": {
+        "description": "Retrieve earnings history and estimates for a specific stock symbol.",
+        "operationId": "getEarningsData",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve earnings data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EarningsDataResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get earnings data"
+      }
+    },
+    "/stocks/financials/{symbol}": {
+      "get": {
+        "description": "Retrieve financial statements for a specific stock symbol.",
+        "operationId": "getFinancialStatements",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve financial statements for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Type of financial statement ('income', 'balance', 'cashflow').",
+            "in": "query",
+            "name": "statementType",
+            "required": true,
+            "schema": {
+              "enum": [
+                "income",
+                "balance",
+                "cashflow"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Period type ('annual', 'quarterly').",
+            "in": "query",
+            "name": "period",
+            "required": false,
+            "schema": {
+              "enum": [
+                "annual",
+                "quarterly"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialStatementsResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get financial statements"
+      }
+    },
+    "/stocks/historical/{symbol}": {
+      "get": {
+        "description": "Retrieve historical price data for a specific stock symbol.",
+        "operationId": "getHistoricalStockData",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve historical data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Start date for the historical data.",
+            "in": "query",
+            "name": "startDate",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "End date for the historical data.",
+            "in": "query",
+            "name": "endDate",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Data interval (e.g., '1d', '1wk', '1mo').",
+            "in": "query",
+            "name": "interval",
+            "required": false,
+            "schema": {
+              "enum": [
+                "1m",
+                "5m",
+                "15m",
+                "30m",
+                "1h",
+                "1d",
+                "1wk",
+                "1mo"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoricalStockDataResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get historical stock data"
+      }
+    },
+    "/stocks/price/{symbol}": {
+      "get": {
+        "description": "Retrieve the current price for a stock symbol.",
+        "operationId": "getStockPrice",
+        "parameters": [
+          {
+            "description": "Stock symbol to get the price for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockPriceResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get current stock price"
+      }
+    },
+    "/stocks/quote/{symbol}": {
+      "get": {
+        "description": "Retrieve real-time quote data for a specific stock symbol.",
+        "operationId": "getStockQuote",
+        "parameters": [
+          {
+            "description": "Stock symbol to retrieve quote data for.",
+            "in": "path",
+            "name": "symbol",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockQuoteResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get real-time stock quote"
+      }
+    },
+    "/stocks/screener": {
+      "get": {
+        "description": "Retrieve stocks that meet specified screening criteria.",
+        "operationId": "getStockScreenerResults",
+        "parameters": [
+          {
+            "description": "Minimum market capitalization.",
+            "in": "query",
+            "name": "marketCapMin",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Maximum market capitalization.",
+            "in": "query",
+            "name": "marketCapMax",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Minimum stock price.",
+            "in": "query",
+            "name": "priceMin",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Maximum stock price.",
+            "in": "query",
+            "name": "priceMax",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Minimum trading volume.",
+            "in": "query",
+            "name": "volumeMin",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Maximum trading volume.",
+            "in": "query",
+            "name": "volumeMax",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "description": "Sector to filter stocks.",
+            "in": "query",
+            "name": "sector",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Industry to filter stocks.",
+            "in": "query",
+            "name": "industry",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockScreenerResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get stocks matching screening criteria"
+      },
+      "post": {
+        "description": "Retrieve stocks that meet specified screening criteria sent in the\nrequest body.",
+        "operationId": "postStockScreenerResults",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockScreenerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockScreenerResponse"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "summary": "Get stocks matching complex screening criteria"
+      }
+    }
+  }
+}
